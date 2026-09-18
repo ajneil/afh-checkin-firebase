@@ -1,0 +1,28 @@
+# Firebase App Hosting build/runtime config.
+# https://firebase.google.com/docs/app-hosting/configure
+
+runConfig:
+  minInstances: 0
+  maxInstances: 1
+  concurrency: 80
+  cpu: 1
+  memoryMiB: 512
+
+env:
+  - variable: APP_URL
+    value: https://REPLACE-WITH-YOUR-APP-HOSTING-URL
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # SMTP_HOST / SMTP_PORT: set these to a real transactional email provider
+  # (e.g. Resend, Brevo) for production. Mailpit is dev-only.
+  - variable: SMTP_HOST
+    value: smtp.example.com
+    availability:
+      - RUNTIME
+
+  - variable: SMTP_PORT
+    value: "587"
+    availability:
+      - RUNTIME

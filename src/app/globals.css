@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+:root {
+  --color-primary:             #E1446F;
+  --color-secondary:           #8FD3E8;
+  --color-accent:              #F2D34F;
+  --color-success:             #96C85B;
+  --color-surface-soft-yellow: #F9E78B;
+  --color-surface-soft-blue:   #BEE6F2;
+  --color-text-primary:        #111111;
+  --color-background:          #FFFDF8;
+}
+
+@theme inline {
+  --color-primary:             var(--color-primary);
+  --color-secondary:           var(--color-secondary);
+  --color-accent:              var(--color-accent);
+  --color-success:             var(--color-success);
+  --color-surface-soft-yellow: var(--color-surface-soft-yellow);
+  --color-surface-soft-blue:   var(--color-surface-soft-blue);
+  --color-text-primary:        var(--color-text-primary);
+  --color-background:          var(--color-background);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1);   opacity: 0.6; }
+  50%       { transform: scale(1.4); opacity: 1;   }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-breathe {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out both;
+}
