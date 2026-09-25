@@ -18,16 +18,16 @@ env:
   # Public Firebase web config (Project settings → General → Your apps → Web app).
   # These identify the project to the browser; they are not secrets.
   - variable: NEXT_PUBLIC_FIREBASE_API_KEY
-    value: REPLACE-WITH-WEB-API-KEY
+    value: "AIzaSyBxzA_jU93aBbSOdbSqBgutVhbqBp9xSIw"
     availability: [BUILD]
   - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
-    value: REPLACE-WITH-PROJECT-ID.firebaseapp.com
+    value: fir-wellness-f833d.firebaseapp.com
     availability: [BUILD]
   - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
-    value: REPLACE-WITH-PROJECT-ID
+    value: fir-wellness-f833d
     availability: [BUILD]
   - variable: NEXT_PUBLIC_FIREBASE_APP_ID
-    value: REPLACE-WITH-WEB-APP-ID
+    value: "1:173107512243:web:79c004953e0f0b2db281c6"
     availability: [BUILD]
 
   # SMTP: a real transactional email provider (e.g. Resend, Brevo) in production.
