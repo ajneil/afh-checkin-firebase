@@ -94,11 +94,13 @@ $CRON_SECRET`. For each person with `morningEmails` on, whose local time is 07:0
 the job gets or creates today's check-in and sends it unless it was already emailed or
 completed; `emailedAt` is set after sending so a failed send is retried by the next run.
 
-The prompt comes from `claude-opus-5` at low effort with server-side refusal fallback,
-given the person's first name and last three completed check-ins as data. Any failure,
-refusal, over-long reply, or missing `ANTHROPIC_API_KEY` falls back to a hand-written
-prompt, so an email is never blocked on the AI. Note that recent answers are sent to
-Anthropic's API to write the prompt; the home page says so.
+The prompt comes from `gemini-3.6-flash` on Vertex AI (`@google/genai`) with low thinking,
+given the person's first name and last three completed check-ins as data. It authenticates
+as the App Hosting service account, so there is no API key; `GEMINI_MODEL` and
+`GOOGLE_CLOUD_LOCATION` (default `global`) can override the model and region. Any error,
+safety block, truncated or over-long reply, or missing `GOOGLE_CLOUD_PROJECT` falls back to
+a hand-written prompt, so an email is never blocked on the AI. Note that recent answers are
+sent to Vertex AI to write the prompt; the home page says so.
 
 ---
 
@@ -157,7 +159,7 @@ src/
       index.ts
   lib/
     ai/
-      morningPrompt.ts           # Claude-written morning prompt, hand-written fallback
+      morningPrompt.ts           # Gemini-written morning prompt, hand-written fallback
     auth/
       currentUser.ts             # Session cookie → signed-in person
     checkins/

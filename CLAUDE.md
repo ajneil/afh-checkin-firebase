@@ -19,7 +19,7 @@ See also:
 - **Framework:** Next.js (App Router)
 - **Database:** Firestore via `firebase-admin`
 - **Auth:** Firebase Auth (Google + passwordless email link) → server session cookie
-- **AI:** Claude (`@anthropic-ai/sdk`) writes the morning prompt, with a hand-written fallback
+- **AI:** Gemini 3.6 Flash on Vertex AI (`@google/genai`, no API key) writes the morning prompt, with a hand-written fallback
 - **Email:** Nodemailer + Mailpit (local SMTP)
 - **Infrastructure:** Firebase App Hosting + Firestore emulator for local dev
 - **State:** useState for local UI state, Zustand if cross-component state is needed
