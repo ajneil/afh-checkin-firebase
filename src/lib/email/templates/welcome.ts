@@ -1,4 +1,7 @@
-export function welcomeEmail(name: string): string {
+import { escapeHtml } from './escape'
+
+export function welcomeEmail(rawName: string): string {
+  const name = escapeHtml(rawName)
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,10 +24,10 @@ export function welcomeEmail(name: string): string {
                 You've taken a wonderful step — and we're so glad you're here.
               </p>
               <p style="font-size:16px;line-height:1.6;color:#111111;margin:0 0 16px 0;">
-                Every day, we'll send you a gentle check-in to help you pause, reflect, and set a small intention. It only takes a few minutes, but those minutes can make a real difference.
+                Every morning at around 7:30, we'll send you a gentle check-in to help you pause, reflect, and set a small intention. It only takes a few minutes, but those minutes can make a real difference.
               </p>
               <p style="font-size:16px;line-height:1.6;color:#111111;margin:0 0 32px 0;">
-                Keep an eye on your inbox — your first daily check-in is on its way.
+                You can also start today's check-in any time from the Daily Check-In home page.
               </p>
               <p style="font-size:16px;line-height:1.6;color:#111111;margin:0;">
                 With warmth,<br />

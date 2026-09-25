@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useCheckIn } from '../../hooks/useCheckIn'
 import { ProgressIndicator } from '../ProgressIndicator'
 import { BreatheStep } from '../steps/BreatheStep'
@@ -26,6 +27,9 @@ export function CheckInFlow({ token }: Props) {
         <p className="text-base leading-relaxed max-w-xs" style={{ color: '#444' }}>
           You&apos;ve completed today&apos;s check-in. Carry that intention with you — it matters more than you think.
         </p>
+        <Link href="/" className="font-bold underline" style={{ color: '#E1446F' }}>
+          See your check-ins
+        </Link>
       </div>
     )
   }

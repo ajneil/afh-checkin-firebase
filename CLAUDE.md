@@ -18,6 +18,8 @@ See also:
 
 - **Framework:** Next.js (App Router)
 - **Database:** Firestore via `firebase-admin`
+- **Auth:** Firebase Auth (Google + passwordless email link) → server session cookie
+- **AI:** Claude (`@anthropic-ai/sdk`) writes the morning prompt, with a hand-written fallback
 - **Email:** Nodemailer + Mailpit (local SMTP)
 - **Infrastructure:** Firebase App Hosting + Firestore emulator for local dev
 - **State:** useState for local UI state, Zustand if cross-component state is needed
@@ -64,7 +66,7 @@ src/
 
 - **Default to SSR** using React Server Components.
 - **`'use client'`** is opt-in only — use when a component requires interactivity, browser APIs, or hooks.
-- The sign-up page shell is a Server Component. The check-in flow is a client component (`CheckInFlow`).
+- The home page is a Server Component: sign-in for visitors, the `Dashboard` for signed-in people. Sign-in widgets and the check-in flow (`CheckInFlow`) are client components.
 - API routes live in `src/app/api/`.
 
 ---
@@ -108,7 +110,7 @@ The check-in flow step state lives in `useCheckIn` hook — no Zustand needed un
 ## Database Conventions
 
 - Firestore Admin SDK client is a singleton in `src/lib/db/firestore.ts` — never call `initializeApp`/`getFirestore` directly in route handlers.
-- Two top-level collections: `users` (doc ID = normalized lowercase email, so uniqueness comes from `.create()` failing rather than a separate lookup) and `checkins` (doc ID = the signup token, so a check-in lookup is a single `.doc(token).get()` with no query needed).
+- Two top-level collections: `users` (doc ID = normalized lowercase email, so uniqueness comes from `.create()` failing rather than a separate lookup) and `checkins` (doc ID = a random token, so a check-in lookup is a single `.doc(token).get()` with no query needed). `users/{email}/days/{YYYY-MM-DD}` indexes one check-in per person per local day; it and its check-in are created together in one batch.
 - Firestore is reached only through the Admin SDK on the server — `firestore.rules` denies all direct client access.
 - Local dev uses the Firestore emulator (`firebase emulators:start`); never point local dev at production Firestore.
 - Never expose raw database errors to the client — catch and return appropriate HTTP status codes.
@@ -147,4 +149,5 @@ The check-in flow step state lives in `useCheckIn` hook — no Zustand needed un
 - When making architectural decisions not covered here, flag the decision and reasoning before proceeding.
 - Keep commits small and focused — one logical change at a time.
 - When in doubt, prefer explicit over clever.
-- Firebase Auth is still out of scope — this project only uses Firestore + Firebase App Hosting, not the auth product.
+- Firebase Auth is used only to prove identity in the browser. `/api/session` verifies the ID token with the Admin SDK and sets an httpOnly `__session` cookie; server code reads the person with `getCurrentUser()`. Clients still never talk to Firestore directly.
+- Check-in links in emails stay token-based, so they work without signing in.

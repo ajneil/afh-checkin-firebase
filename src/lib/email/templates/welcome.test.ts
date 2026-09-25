@@ -14,3 +14,9 @@ describe('welcomeEmail', () => {
     expect(html).toContain('Jordan')
   })
 })
+
+describe('welcomeEmail escaping', () => {
+  it('escapes the name', () => {
+    expect(welcomeEmail('<i>Sam</i>')).toContain('&lt;i&gt;Sam&lt;/i&gt;')
+  })
+})

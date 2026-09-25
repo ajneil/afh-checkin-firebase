@@ -22,5 +22,12 @@ export default defineConfig({
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
+    // Placeholder public Firebase config: tests stub Firebase Auth's network calls.
+    env: {
+      NEXT_PUBLIC_FIREBASE_API_KEY: 'e2e-api-key',
+      NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: 'demo-afh.firebaseapp.com',
+      NEXT_PUBLIC_FIREBASE_PROJECT_ID: 'demo-afh',
+      NEXT_PUBLIC_FIREBASE_APP_ID: 'e2e-app-id',
+    },
   },
 })

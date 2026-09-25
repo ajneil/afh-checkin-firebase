@@ -45,20 +45,60 @@ No formal schema file — Firestore is schemaless, so the shape is documented he
 users/{email}                      # doc ID = normalized lowercase email
   name: string
   email: string
+  uid: string | null               # Firebase Auth UID (null for pre-sign-in accounts)
+  timeZone: string                 # IANA zone from the browser at sign-in
+  morningEmails: boolean
   createdAt: Timestamp
 
-checkins/{token}                   # doc ID = the signup token (crypto.randomUUID())
+users/{email}/days/{YYYY-MM-DD}    # one per person per local calendar day
+  day: string
+  token: string                    # → checkins/{token}
+  prompt: string                   # the morning prompt for that day
+  emailedAt: Timestamp | null      # set after the morning email is sent
+  createdAt: Timestamp
+
+checkins/{token}                   # doc ID = crypto.randomUUID()
   userId: string                   # references users/{email}
+  day: string | null
+  prompt: string | null
   date: Timestamp
   completedAt: Timestamp | null
-  breatheNote: string | null       # optional — breathe step may be guidance only
+  breatheNote: string | null
   reflection: string | null
   gratitude: string | null
   intention: string | null
   createdAt: Timestamp
 ```
 
-Using the email as the `users` doc ID and the token as the `checkins` doc ID means both lookups Prisma did with `findUnique` become plain `.doc(id).get()` calls, and duplicate-signup protection comes from `.create()` throwing `ALREADY_EXISTS` rather than a separate find-then-write race.
+The day doc and its check-in are written in one batch whose `create()` fails if the day
+already exists, so concurrent requests (the morning job and someone opening the app)
+always converge on a single check-in per day. Recent check-ins are read through the day
+docs, so no composite index is needed.
+
+---
+
+## Sign-in
+
+Firebase Auth runs in the browser only to prove identity, via Google (`signInWithPopup`)
+or a passwordless email link (`sendSignInLinkToEmail` → `/auth/finish`). The client posts
+the fresh ID token to `POST /api/session`, which verifies it with the Admin SDK (verified
+email, signed in within five minutes), creates or links `users/{email}`, and sets a 14-day
+httpOnly `__session` cookie (the only cookie Firebase's CDN forwards). Server Components
+call `getCurrentUser()`; the browser keeps no Firebase state. Accounts are keyed by email,
+so Google and email-link sign-ins for the same address are one person.
+
+## Morning emails and AI prompt
+
+Cloud Scheduler calls `POST /api/cron/morning` hourly at :30 with `Authorization: Bearer
+$CRON_SECRET`. For each person with `morningEmails` on, whose local time is 07:00–09:59,
+the job gets or creates today's check-in and sends it unless it was already emailed or
+completed; `emailedAt` is set after sending so a failed send is retried by the next run.
+
+The prompt comes from `claude-opus-5` at low effort with server-side refusal fallback,
+given the person's first name and last three completed check-ins as data. Any failure,
+refusal, over-long reply, or missing `ANTHROPIC_API_KEY` falls back to a hand-written
+prompt, so an email is never blocked on the AI. Note that recent answers are sent to
+Anthropic's API to write the prompt; the home page says so.
 
 ---
 
@@ -67,23 +107,30 @@ Using the email as the `users` doc ID and the token as the `checkins` doc ID mea
 ```
 src/
   app/
-    page.tsx                    # Sign-up page (SSR)
+    page.tsx                    # Sign-in for visitors, Dashboard when signed in (SSR)
+    actions.ts                  # Server actions: start today's check-in, email preference
+    auth/finish/page.tsx        # Completes an email-link sign-in
     layout.tsx
-    error.tsx
-    loading.tsx
     api/
-      signup/
-        route.ts                # POST — create user, send emails
+      session/route.ts          # POST sign in (ID token → session cookie), DELETE sign out
+      cron/morning/route.ts     # POST — morning email job (Cloud Scheduler)
       checkin/
         complete/
           route.ts              # POST — save check-in responses
   features/
-    signup/
+    auth/
       components/
-        SignupForm/
-          SignupForm.tsx
-          SignupForm.test.tsx
-          index.ts
+        SignInForm/              # Google + name/email link (props only)
+        SignInSection/           # Wires SignInForm to Firebase Auth
+        FinishSignIn/            # Email-link completion
+        SignOutButton/
+      utils/
+        signIn.ts                # Browser Firebase Auth flows → /api/session
+        authErrorMessage.ts
+      index.ts
+    today/
+      components/
+        Dashboard/               # Today's prompt, recent check-ins, email switch
       index.ts
     checkin/
       components/
@@ -109,23 +156,33 @@ src/
       types.ts
       index.ts
   lib/
+    ai/
+      morningPrompt.ts           # Claude-written morning prompt, hand-written fallback
+    auth/
+      currentUser.ts             # Session cookie → signed-in person
+    checkins/
+      daily.ts                   # One check-in per person per local day
     db/
-      firestore.ts               # Firestore Admin SDK singleton + collection refs
+      firestore.ts               # Admin SDK singleton (Firestore + Auth) + collection refs
+    firebase/
+      client.ts                  # Browser Firebase Auth (emulator-aware)
+    morning/
+      sendMorningEmails.ts       # The 7:30 local-time email job
+    time/
+      localTime.ts
     email/
       mailer.ts                  # Nodemailer transport (Mailpit SMTP)
       templates/
         welcome.ts               # Welcome email HTML
         checkin.ts               # Daily check-in email HTML with token link
-    validation/
-      email.ts                   # Email format check used by /api/signup
   types/
     index.ts
   providers/
     AppProviders.tsx
 e2e/
-  signup.spec.ts
+  signin.spec.ts
   checkin.spec.ts
-firebase.json                    # Firestore emulator config for local dev
+firebase.json                    # Auth + Firestore emulator config for local dev
 firestore.rules                  # Deny-all — only the Admin SDK talks to Firestore
 firestore.indexes.json
 apphosting.yaml                  # Firebase App Hosting runtime config
@@ -134,33 +191,20 @@ apphosting.yaml                  # Firebase App Hosting runtime config
 
 ---
 
-## API Routes
+## API Routes and Server Actions
 
-### `POST /api/signup`
-**Body:** `{ name: string, email: string }`
-**Actions:**
-1. Validate input, including email format
-2. Create `users/{email}` doc — fails atomically (400) if it already exists
-3. Create `checkins/{token}` doc with a fresh `crypto.randomUUID()` token
-4. Send welcome email via Mailpit
-5. Send check-in email with link: `http://localhost:3000/checkin/[token]`
-6. Return `{ success: true, emailDelivered: boolean }`
+| Route | Purpose |
+|---|---|
+| `POST /api/session` | `{ idToken, name?, timeZone? }` → verify, create/link account, set session cookie, welcome email for new accounts |
+| `DELETE /api/session` | Sign out (clear cookie) |
+| `POST /api/cron/morning` | Morning email job; requires `Authorization: Bearer $CRON_SECRET` |
+| `GET /api/checkin/[token]` | `{ status: 'pending' \| 'completed' \| 'not_found', prompt? }` |
+| `POST /api/checkin/complete` | `{ token, reflection, gratitude, intention }` → save responses once |
+| `startTodaysCheckIn` (action) | Get or create today's check-in for the signed-in person, redirect to it |
+| `setMorningEmails` (action) | Turn morning emails on or off |
 
-**Errors:** 400 if email invalid or already registered, 500 on unexpected Firestore failure.
-A failure to *send* email is reported as `emailDelivered: false` on an otherwise-200 response — the account and check-in doc already exist by that point, so a mail outage shouldn't look like the whole signup failed.
-
-### `GET /checkin/[token]`
-- Page route — looks up check-in by token
-- If not found or already completed: show appropriate state
-- If valid: render `<CheckInFlow>`
-
-### `POST /api/checkin/complete`
-**Body:** `{ token: string, reflection: string, gratitude: string, intention: string }`
-**Actions:**
-1. Find check-in by token
-2. Validate not already completed
-3. Save responses + set `completedAt`
-4. Return `{ success: true }`
+A failure to *send* email never fails the request that caused it: sign-in still succeeds
+if the welcome email fails, and the morning job reports `{ sent, skipped, failed }`.
 
 ---
 
@@ -252,6 +296,6 @@ must point at a real transactional email provider; see `apphosting.yaml`.
 |---|---|---|---|
 | Database | Firestore via `firebase-admin` | PostgreSQL + Prisma (the [original repo](https://github.com/ajneil/afh-tech-test)) | This variant optimizes for cheap Firebase-native hosting — no always-on Cloud SQL instance to pay for, and App Hosting deploys straight from source with no Dockerfile |
 | Email | Nodemailer + Mailpit (dev) | Firebase Extensions | Self-contained locally; swap for a real SMTP provider in production either way |
-| Scheduling | Sign-up triggers immediate check-in email | Cron job | Avoids scheduler complexity in Docker; documented in REFLECTION.md |
-| Auth | None — token-based access | Firebase Auth | Brief doesn't require password auth; token link is sufficient |
+| Scheduling | Cloud Scheduler → API route, hourly, per-person local time | Cloud Functions scheduled function | Keeps all logic (templates, AI, data access) in the one Next.js app; one `gcloud` command to set up |
+| Auth | Firebase Auth (Google + email link) → server session cookie | Tokens only (original) | People asked for accounts and history; email link needs no password and works for any address; Firestore stays server-only |
 | Check-in flow | Single page, client-side steps | Separate routes per step | Better UX, simpler state management, faster to build |

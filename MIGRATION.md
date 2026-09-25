@@ -27,8 +27,9 @@ These were found reviewing the original before starting the rewrite. None are
 present in this repo:
 
 1. **No email format validation** — `/api/signup` accepted any non-empty
-   string as an email. Fixed with a basic format check
-   (`src/lib/validation/email.ts`) before any write happens.
+   string as an email. Fixed with a basic format check before any write happens.
+   (Since superseded: sign-in now goes through Firebase Auth, which validates and
+   verifies the address.)
 2. **Signup race condition** — the original checked `findUnique` then
    `create`'d the user as two separate steps, so two concurrent signups with
    the same email could both pass the check and both try to create the user.
