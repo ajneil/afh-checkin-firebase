@@ -15,14 +15,45 @@ env:
       - BUILD
       - RUNTIME
 
-  # SMTP_HOST / SMTP_PORT: set these to a real transactional email provider
-  # (e.g. Resend, Brevo) for production. Mailpit is dev-only.
+  # Public Firebase web config (Project settings → General → Your apps → Web app).
+  # These identify the project to the browser; they are not secrets.
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: REPLACE-WITH-WEB-API-KEY
+    availability: [BUILD]
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: REPLACE-WITH-PROJECT-ID.firebaseapp.com
+    availability: [BUILD]
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: REPLACE-WITH-PROJECT-ID
+    availability: [BUILD]
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: REPLACE-WITH-WEB-APP-ID
+    availability: [BUILD]
+
+  # SMTP: a real transactional email provider (e.g. Resend, Brevo) in production.
+  # Mailpit is dev-only.
   - variable: SMTP_HOST
     value: smtp.example.com
     availability:
       - RUNTIME
-
   - variable: SMTP_PORT
-    value: "587"
+    value: "465"
     availability:
       - RUNTIME
+  - variable: MAIL_FROM
+    value: "Daily Check-In <checkin@REPLACE-WITH-YOUR-VERIFIED-DOMAIN>"
+    availability:
+      - RUNTIME
+
+  # Secrets live in Cloud Secret Manager. Create each once with:
+  #   firebase apphosting:secrets:set <NAME>
+  - variable: SMTP_USER
+    secret: SMTP_USER
+  - variable: SMTP_PASS
+    secret: SMTP_PASS
+  # Shared with the Cloud Scheduler job that calls /api/cron/morning.
+  - variable: CRON_SECRET
+    secret: CRON_SECRET
+  # Optional: without it, morning prompts come from a hand-written list.
+  - variable: ANTHROPIC_API_KEY
+    secret: ANTHROPIC_API_KEY
