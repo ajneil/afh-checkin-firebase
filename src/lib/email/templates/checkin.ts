@@ -1,4 +1,15 @@
-export function checkInEmail(name: string, checkInUrl: string): string {
+import { escapeHtml } from './escape'
+
+type Extras = { prompt?: string; manageUrl?: string }
+
+export function checkInEmail(rawName: string, checkInUrl: string, extras: Extras = {}): string {
+  const name = escapeHtml(rawName)
+  const prompt = extras.prompt
+    ? `<p style="font-size:18px;line-height:1.6;color:#111111;margin:0 0 24px 0;padding:16px 20px;background-color:#BEE6F2;border-radius:12px;">${escapeHtml(extras.prompt)}</p>`
+    : ''
+  const manage = extras.manageUrl
+    ? ` <a href="${extras.manageUrl}" style="color:#888;">Manage your emails</a>.`
+    : ''
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,6 +31,7 @@ export function checkInEmail(name: string, checkInUrl: string): string {
               <p style="font-size:16px;line-height:1.6;color:#111111;margin:0 0 16px 0;">
                 Take a moment just for you. A few minutes to breathe, reflect on how you're feeling, notice what you're grateful for, and set a small intention for today.
               </p>
+              ${prompt}
               <p style="font-size:16px;line-height:1.6;color:#111111;margin:0 0 32px 0;">
                 Ready when you are.
               </p>
@@ -43,7 +55,7 @@ export function checkInEmail(name: string, checkInUrl: string): string {
           <tr>
             <td style="padding:24px 0;text-align:center;">
               <p style="font-size:13px;color:#888;margin:0;">
-                You're receiving this because you signed up at Action for Happiness.
+                You're receiving this because you signed up at Action for Happiness.${manage}
               </p>
             </td>
           </tr>

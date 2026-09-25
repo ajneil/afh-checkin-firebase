@@ -19,3 +19,21 @@ describe('checkInEmail', () => {
     expect(html).toMatch(/<html/i)
   })
 })
+
+describe('checkInEmail morning extras', () => {
+  it('includes the morning prompt when given', () => {
+    const html = checkInEmail('Sam', 'http://x/checkin/t', {
+      prompt: 'What would make today kind?',
+      manageUrl: 'http://x/',
+    })
+    expect(html).toContain('What would make today kind?')
+    expect(html).toContain('href="http://x/"')
+  })
+
+  it('escapes names and prompts so they cannot inject HTML', () => {
+    const html = checkInEmail('<b>Sam</b>', 'http://x/checkin/t', { prompt: '<script>x</script>' })
+    expect(html).not.toContain('<b>Sam</b>')
+    expect(html).not.toContain('<script>')
+    expect(html).toContain('&lt;b&gt;Sam&lt;/b&gt;')
+  })
+})

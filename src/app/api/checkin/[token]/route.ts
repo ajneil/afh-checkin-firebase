@@ -20,7 +20,8 @@ export async function GET(
       return Response.json({ status: 'completed' })
     }
 
-    return Response.json({ status: 'pending' })
+    const prompt = snapshot.get('prompt')
+    return Response.json({ status: 'pending', prompt: typeof prompt === 'string' ? prompt : null })
   } catch {
     return Response.json({ status: 'not_found' }, { status: 404 })
   }

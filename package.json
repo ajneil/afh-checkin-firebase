@@ -13,6 +13,8 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0",
+    "firebase": "^12.19.0",
     "firebase-admin": "^13.0.2",
     "next": "16.2.4",
     "nodemailer": "^8.0.5",
