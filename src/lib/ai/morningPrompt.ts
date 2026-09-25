@@ -1,4 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk'
+import { FinishReason, GoogleGenAI, ThinkingLevel } from '@google/genai'
 
 export type RecentAnswer = {
   day: string
@@ -45,44 +45,47 @@ function describe(name: string, recent: RecentAnswer[]): string {
   return `First name: ${name}\n\n<recent_check_ins>\n${entries || '(none yet)'}\n</recent_check_ins>\n\nWrite this morning's prompt.`
 }
 
-let client: Anthropic | undefined
+const DEFAULT_MODEL = 'gemini-3.6-flash'
 
-/** A short, personal morning prompt. Never throws: falls back to a hand-written one. */
+let client: GoogleGenAI | undefined
+
+/**
+ * A short, personal morning prompt from Gemini on Vertex AI. Authenticates as the
+ * App Hosting service account (no API key). Never throws: falls back to a
+ * hand-written prompt when AI is not configured or the call does not succeed.
+ */
 export async function morningPrompt(
   name: string,
   recent: RecentAnswer[],
   day: string
 ): Promise<string> {
-  if (!process.env.ANTHROPIC_API_KEY) return fallbackPrompt(day)
-  client ??= new Anthropic({ timeout: 20_000, maxRetries: 1 })
+  const project = process.env.GOOGLE_CLOUD_PROJECT
+  if (!project) return fallbackPrompt(day)
+  client ??= new GoogleGenAI({
+    vertexai: true,
+    project,
+    location: process.env.GOOGLE_CLOUD_LOCATION || 'global',
+    httpOptions: { timeout: 20_000 },
+  })
   try {
-    const response = await client.beta.messages.create({
-      model: 'claude-opus-5',
-      max_tokens: 2000,
-      betas: ['server-side-fallback-2026-07-01'],
-      fallbacks: 'default',
-      output_config: { effort: 'low' },
-      system: SYSTEM,
-      messages: [{ role: 'user', content: describe(name.split(' ')[0] || name, recent) }],
+    const response = await client.models.generateContent({
+      model: process.env.GEMINI_MODEL || DEFAULT_MODEL,
+      contents: describe(name.split(' ')[0] || name, recent),
+      config: {
+        systemInstruction: SYSTEM,
+        maxOutputTokens: 2048,
+        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+      },
     })
-    if (response.stop_reason !== 'end_turn') return fallbackPrompt(day)
-    const text = response.content
-      .map((block) => (block.type === 'text' ? block.text : ''))
-      .join('')
+    // Anything but a clean stop (safety block, token limit, recitation) uses the fallback.
+    if (response.candidates?.[0]?.finishReason !== FinishReason.STOP) return fallbackPrompt(day)
+    const text = (response.text ?? '')
       .trim()
       .replace(/^["“]|["”]$/g, '')
       .trim()
     return text && text.length <= MAX_LENGTH ? text : fallbackPrompt(day)
   } catch (error) {
-    if (error instanceof Anthropic.AuthenticationError) {
-      console.error('Morning prompt: Anthropic API key rejected')
-    } else if (error instanceof Anthropic.RateLimitError) {
-      console.warn('Morning prompt: rate limited, using a hand-written prompt')
-    } else if (error instanceof Anthropic.APIError) {
-      console.error('Morning prompt: API error', error.message)
-    } else {
-      console.error('Morning prompt failed', error)
-    }
+    console.error('Morning prompt failed, using a hand-written prompt', String(error))
     return fallbackPrompt(day)
   }
 }

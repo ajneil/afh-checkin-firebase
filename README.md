@@ -3,7 +3,7 @@
 A full-stack daily check-in system built with Next.js, Firestore, Firebase Auth
 and Nodemailer. People sign in with Google or with their name and email (a
 passwordless sign-in link). Each morning at around 7:30 in their own time zone
-they get an email with a short, personal prompt written by Claude from their
+they get an email with a short, personal prompt written by Gemini from their
 recent check-ins, and a tokenised link to a guided 4-step experience (Breathe →
 Reflect → Gratitude → Intention). Signed in, the home page shows today's prompt,
 recent check-ins and a switch for the morning emails.
@@ -39,7 +39,7 @@ docker run -p 8025:8025 -p 1025:1025 axllent/mailpit   # Terminal 3 (optional): 
    `curl -X POST -H "Authorization: Bearer local-secret" http://localhost:3000/api/cron/morning`
    and open it in Mailpit.
 
-Without `ANTHROPIC_API_KEY`, morning prompts come from a hand-written list.
+Locally (no `GOOGLE_CLOUD_PROJECT`), morning prompts come from a hand-written list.
 
 ---
 
@@ -68,10 +68,18 @@ responses with `page.route()` and do not require a running database.
 3. Register a web app and copy its config into the `NEXT_PUBLIC_FIREBASE_*` values in
    `apphosting.yaml`; set `APP_URL`, `SMTP_HOST`/`SMTP_PORT` and `MAIL_FROM` for your email provider.
 4. Create the secrets: `firebase apphosting:secrets:set SMTP_USER` (and `SMTP_PASS`,
-   `CRON_SECRET`, optionally `ANTHROPIC_API_KEY`).
-5. `firebase deploy --only firestore` to publish rules and indexes, then create the App
+   `CRON_SECRET`).
+5. Let the app use Gemini (no API key; it runs as the App Hosting service account):
+
+   ```bash
+   gcloud services enable aiplatform.googleapis.com --project=fir-wellness-f833d
+   gcloud projects add-iam-policy-binding fir-wellness-f833d \
+     --member="serviceAccount:firebase-app-hosting-compute@fir-wellness-f833d.iam.gserviceaccount.com" \
+     --role="roles/aiplatform.user"
+   ```
+6. `firebase deploy --only firestore` to publish rules and indexes, then create the App
    Hosting backend: `firebase apphosting:backends:create`.
-6. Schedule the morning job hourly at :30 (each person gets it at 7:30 local time):
+7. Schedule the morning job hourly at :30 (each person gets it at 7:30 local time):
 
    ```bash
    gcloud scheduler jobs create http afh-morning-checkin \
@@ -89,7 +97,7 @@ responses with `page.route()` and do not require a running database.
 | Framework | Next.js 16 (App Router) |
 | Database | Firestore via `firebase-admin` |
 | Sign-in | Firebase Auth (Google, email link) + session cookie |
-| Morning prompt | Claude via `@anthropic-ai/sdk` |
+| Morning prompt | Gemini 3.6 Flash on Vertex AI via `@google/genai` |
 | Scheduling | Cloud Scheduler → `/api/cron/morning` |
 | Email transport | Nodemailer |
 | Local email server | Mailpit |

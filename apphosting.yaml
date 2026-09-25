@@ -45,6 +45,13 @@ env:
     availability:
       - RUNTIME
 
+  # Gemini on Vertex AI, authenticated as the App Hosting service account (no key).
+  # Needs the Vertex AI API enabled and roles/aiplatform.user; see README.
+  - variable: GOOGLE_CLOUD_PROJECT
+    value: fir-wellness-f833d
+    availability:
+      - RUNTIME
+
   # Secrets live in Cloud Secret Manager. Create each once with:
   #   firebase apphosting:secrets:set <NAME>
   - variable: SMTP_USER
@@ -54,6 +61,3 @@ env:
   # Shared with the Cloud Scheduler job that calls /api/cron/morning.
   - variable: CRON_SECRET
     secret: CRON_SECRET
-  # Optional: without it, morning prompts come from a hand-written list.
-  - variable: ANTHROPIC_API_KEY
-    secret: ANTHROPIC_API_KEY
