@@ -6,7 +6,8 @@ passwordless sign-in link). Each morning at around 7:30 in their own time zone
 they get an email with a short, personal prompt written by Gemini from their
 recent check-ins, and a tokenised link to a guided 4-step experience (Breathe →
 Reflect → Gratitude → Intention). Signed in, the home page shows today's prompt,
-recent check-ins and a switch for the morning emails.
+recent check-ins, and switches for the morning email and for morning push notifications
+(installable as an app; on iPhone, add it to the Home Screen first).
 
 This is a Firestore/Firebase Hosting variant of
 **[ajneil/afh-tech-test](https://github.com/ajneil/afh-tech-test)**, which
@@ -69,7 +70,9 @@ responses with `page.route()` and do not require a running database.
    `apphosting.yaml`; set `APP_URL`, `SMTP_HOST`/`SMTP_PORT` and `MAIL_FROM` for your email provider.
 4. Create the secrets: `firebase apphosting:secrets:set SMTP_USER` (and `SMTP_PASS`,
    `CRON_SECRET`).
-5. Let the app use Gemini (no API key; it runs as the App Hosting service account):
+5. Morning notifications: Project settings → Cloud Messaging → Web Push certificates →
+   **Generate key pair**, and set `NEXT_PUBLIC_FIREBASE_VAPID_KEY` in `apphosting.yaml`.
+6. Let the app use Gemini (no API key; it runs as the App Hosting service account):
 
    ```bash
    gcloud services enable aiplatform.googleapis.com --project=fir-wellness-f833d
@@ -77,9 +80,9 @@ responses with `page.route()` and do not require a running database.
      --member="serviceAccount:firebase-app-hosting-compute@fir-wellness-f833d.iam.gserviceaccount.com" \
      --role="roles/aiplatform.user"
    ```
-6. `firebase deploy --only firestore` to publish rules and indexes, then create the App
+7. `firebase deploy --only firestore` to publish rules and indexes, then create the App
    Hosting backend: `firebase apphosting:backends:create`.
-7. Schedule the morning job hourly at :30 (each person gets it at 7:30 local time):
+8. Schedule the morning job hourly at :30 (each person gets it at 7:30 local time):
 
    ```bash
    gcloud scheduler jobs create http afh-morning-checkin \

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const sendMorningEmails = vi.fn(async () => ({ sent: 2, skipped: 1, failed: 0 }))
-vi.mock('@/lib/morning/sendMorningEmails', () => ({ sendMorningEmails }))
+const sendMorningCheckIns = vi.fn(async () => ({ emailed: 2, pushed: 1, skipped: 1, failed: 0 }))
+vi.mock('@/lib/morning/sendMorningCheckIns', () => ({ sendMorningCheckIns }))
 
 const { POST } = await import('./route')
 const call = (auth?: string) =>
@@ -14,20 +14,20 @@ const call = (auth?: string) =>
 
 describe('POST /api/cron/morning', () => {
   beforeEach(() => {
-    sendMorningEmails.mockClear()
+    sendMorningCheckIns.mockClear()
     process.env.CRON_SECRET = 'a-long-shared-secret'
   })
 
   it('runs the morning job with the right secret', async () => {
     const res = await call('Bearer a-long-shared-secret')
     expect(res.status).toBe(200)
-    expect(await res.json()).toEqual({ sent: 2, skipped: 1, failed: 0 })
-    expect(sendMorningEmails).toHaveBeenCalledOnce()
+    expect(await res.json()).toEqual({ emailed: 2, pushed: 1, skipped: 1, failed: 0 })
+    expect(sendMorningCheckIns).toHaveBeenCalledOnce()
   })
 
   it.each([undefined, 'Bearer wrong', 'a-long-shared-secret'])('rejects %s', async (auth) => {
     expect((await call(auth)).status).toBe(401)
-    expect(sendMorningEmails).not.toHaveBeenCalled()
+    expect(sendMorningCheckIns).not.toHaveBeenCalled()
   })
 
   it('refuses to run at all when no secret is configured', async () => {

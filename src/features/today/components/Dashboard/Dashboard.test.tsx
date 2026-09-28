@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react'
 import { Dashboard } from './Dashboard'
 
 vi.mock('@/features/auth', () => ({ SignOutButton: () => <button>Sign out</button> }))
+vi.mock('@/features/notifications', () => ({ PushToggle: () => <p>Morning notifications</p> }))
 
 const base = {
   name: 'Alex Smith',
@@ -57,5 +58,10 @@ describe('Dashboard', () => {
   it('says the prompt is written with AI from recent answers', () => {
     render(<Dashboard {...base} />)
     expect(screen.getByText(/written by ai/i)).toBeInTheDocument()
+  })
+
+  it('includes the morning notifications setting', () => {
+    render(<Dashboard {...base} />)
+    expect(screen.getByText('Morning notifications')).toBeInTheDocument()
   })
 })

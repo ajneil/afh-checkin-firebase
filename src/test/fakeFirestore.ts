@@ -38,6 +38,9 @@ export function fakeFirestore() {
         if (!store.has(path)) throw Object.assign(new Error('NOT_FOUND'), { code: 5 })
         store.set(path, { ...store.get(path), ...data })
       },
+      delete: async () => {
+        store.delete(path)
+      },
       collection: (name: string) => collectionRef(`${path}/${name}`),
     }
   }
