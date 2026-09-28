@@ -7,8 +7,16 @@ type Props = {
   onEmailLink: (data: { name: string; email: string }) => Promise<void>
 }
 
-const inputClass =
-  'rounded-xl border border-gray-200 px-4 py-3 text-base outline-none focus:ring-2 focus:ring-[#E1446F]'
+const inputClass = 'soft-input'
+
+const GoogleLogo = () => (
+  <svg viewBox="0 0 24 24" className="w-5 h-5" aria-hidden="true">
+    <path fill="#4285F4" d="M22.6 12.2c0-.8-.1-1.5-.2-2.2H12v4.2h6c-.3 1.4-1 2.5-2.2 3.3v2.7h3.6c2-1.9 3.2-4.7 3.2-8Z" />
+    <path fill="#34A853" d="M12 23c3 0 5.5-1 7.4-2.7l-3.6-2.8c-1 .7-2.3 1.1-3.8 1.1-2.9 0-5.4-2-6.3-4.6H2v2.8C3.9 20.5 7.7 23 12 23Z" />
+    <path fill="#FBBC05" d="M5.7 14c-.2-.7-.4-1.4-.4-2s.2-1.3.4-2V7.2H2C1.4 8.7 1 10.3 1 12s.4 3.3 1 4.8L5.7 14Z" />
+    <path fill="#EA4335" d="M12 5.4c1.6 0 3.1.6 4.2 1.7l3.2-3.2C17.5 2.1 15 1 12 1 7.7 1 3.9 3.5 2 7.2L5.7 10c.9-2.6 3.4-4.6 6.3-4.6Z" />
+  </svg>
+)
 
 export function SignInForm({ onGoogle, onEmailLink }: Props) {
   const [name, setName] = useState('')
@@ -34,7 +42,7 @@ export function SignInForm({ onGoogle, onEmailLink }: Props) {
   if (sentTo) {
     return (
       <div className="text-center py-8">
-        <p className="text-2xl font-bold" style={{ color: '#96C85B' }}>Check your inbox 🌱</p>
+        <p className="text-2xl font-bold" style={{ color: '#4f8a3f' }}>Check your inbox 🌱</p>
         <p className="mt-2 text-base" style={{ color: '#111111' }}>
           We&apos;ve sent a sign-in link to <strong>{sentTo}</strong>. Open it on this device to continue.
         </p>
@@ -48,14 +56,16 @@ export function SignInForm({ onGoogle, onEmailLink }: Props) {
         type="button"
         onClick={() => run('google', onGoogle)}
         disabled={busy !== null}
-        className="rounded-xl px-6 py-4 text-base font-bold transition-opacity disabled:opacity-50 border border-gray-200"
-        style={{ background: '#FFFDF8', color: '#111111' }}
+        className="pill-button pill-button-quiet w-full"
       >
+        <GoogleLogo />
         {busy === 'google' ? 'Opening Google…' : 'Continue with Google'}
       </button>
 
-      <p className="text-center text-sm" style={{ color: '#555' }}>
+      <p className="flex items-center gap-3 text-sm" style={{ color: '#5b6470' }}>
+        <span className="h-px flex-1 bg-black/10" />
         or use any email address
+        <span className="h-px flex-1 bg-black/10" />
       </p>
 
       <form
@@ -82,7 +92,6 @@ export function SignInForm({ onGoogle, onEmailLink }: Props) {
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Alex"
             className={inputClass}
-            style={{ background: '#FFFDF8', color: '#111111' }}
             autoComplete="name"
           />
         </div>
@@ -97,7 +106,6 @@ export function SignInForm({ onGoogle, onEmailLink }: Props) {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
             className={inputClass}
-            style={{ background: '#FFFDF8', color: '#111111' }}
             autoComplete="email"
           />
         </div>
@@ -108,12 +116,7 @@ export function SignInForm({ onGoogle, onEmailLink }: Props) {
           </div>
         )}
 
-        <button
-          type="submit"
-          disabled={!canSend}
-          className="rounded-xl px-6 py-4 text-base font-bold text-white transition-opacity disabled:opacity-50"
-          style={{ background: '#E1446F' }}
-        >
+        <button type="submit" disabled={!canSend} className="pill-button w-full">
           {busy === 'email' ? 'Sending…' : 'Email me a sign-in link'}
         </button>
       </form>

@@ -37,7 +37,7 @@ export function FinishSignIn({ isLink, pending, complete }: Props) {
 
   if (!isLink) {
     return (
-      <div className="flex flex-col items-center text-center gap-4 py-16">
+      <div className="soft-card soft-card-blue flex flex-col items-center text-center gap-4 px-6 py-12">
         <h1 className="text-2xl font-bold" style={{ color: '#111111' }}>This sign-in link isn&apos;t valid</h1>
         <p className="text-base" style={{ color: '#555' }}>It may have expired or already been used.</p>
         <Link href="/" className="font-bold underline" style={{ color: '#E1446F' }}>Back to sign in</Link>
@@ -46,7 +46,7 @@ export function FinishSignIn({ isLink, pending, complete }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-6 py-8">
+    <div className="soft-card p-7 flex flex-col gap-6">
       {working ? (
         <p className="text-center text-base" style={{ color: '#555' }}>Signing you in…</p>
       ) : (
@@ -70,14 +70,12 @@ export function FinishSignIn({ isLink, pending, complete }: Props) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
-              className="rounded-xl border border-gray-200 px-4 py-3 text-base outline-none focus:ring-2 focus:ring-[#E1446F]"
-              style={{ background: '#FFFDF8', color: '#111111' }}
+              className="soft-input"
             />
             <button
               type="submit"
               disabled={!email.trim()}
-              className="rounded-xl px-6 py-4 text-base font-bold text-white disabled:opacity-50"
-              style={{ background: '#E1446F' }}
+              className="pill-button"
             >
               Continue
             </button>

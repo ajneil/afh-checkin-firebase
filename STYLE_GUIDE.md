@@ -78,6 +78,14 @@ Define these as CSS custom properties in your global stylesheet or Tailwind conf
 - Light borders or no borders — never heavy drop shadows
 - Rounded corners, comfortable internal padding
 
+### Implemented building blocks
+- **Font:** DM Sans (via `next/font`) for headings and body.
+- **`.soft-card`** — white-to-mist gradient card, 28px radius, faint border and a soft, low shadow. Tints: `soft-card-yellow` (Reflect, celebrations), `soft-card-blue` (Gratitude, home, sign-in), `soft-card-peach` (Intention), `soft-card-green`.
+- **`.pill-button`** — pink gradient pill with an arrow for the one primary action; `pill-button-quiet` is the white secondary pill (Google sign-in, settings).
+- **`.soft-input`** — rounded translucent white field.
+- **Decor** (`src/components/decor`) — `Sprig` leaves, `Hills`, `Confetti`, `IconBubble` and line icons, all inline SVG and `aria-hidden`; `Celebration` is the star-in-a-glow completion card.
+- **Page background** — `.page-scene`: warm off-white with faint blue and yellow washes and soft hills at the bottom.
+
 ### Navigation
 - Clean and minimal
 - Avoid heavy nav bars or complex mega-menus
