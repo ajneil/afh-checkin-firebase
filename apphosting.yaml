@@ -10,7 +10,7 @@ runConfig:
 
 env:
   - variable: APP_URL
-    value: https://REPLACE-WITH-YOUR-APP-HOSTING-URL
+    value: https://wellness.ajneil.co.uk
     availability:
       - BUILD
       - RUNTIME
@@ -30,20 +30,17 @@ env:
     value: "1:173107512243:web:79c004953e0f0b2db281c6"
     availability: [BUILD]
 
-  # SMTP: a real transactional email provider (e.g. Resend, Brevo) in production.
+  # SMTP: Gmail with an app password (SMTP_USER / SMTP_PASS secrets below).
   # Mailpit is dev-only.
   - variable: SMTP_HOST
-    value: smtp.example.com
+    value: smtp.gmail.com
     availability:
       - RUNTIME
   - variable: SMTP_PORT
     value: "465"
     availability:
       - RUNTIME
-  - variable: MAIL_FROM
-    value: "Daily Check-In <checkin@REPLACE-WITH-YOUR-VERIFIED-DOMAIN>"
-    availability:
-      - RUNTIME
+  # Optional MAIL_FROM: without it, emails come from the SMTP_USER account.
 
   # Gemini on Vertex AI, authenticated as the App Hosting service account (no key).
   # Needs the Vertex AI API enabled and roles/aiplatform.user; see README.
