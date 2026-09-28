@@ -215,7 +215,9 @@ if the welcome email fails, and the morning job reports `{ sent, skipped, failed
 4 steps managed by `useCheckIn` hook:
 
 ```
-Step 1: Breathe     — Guidance text, breathing animation, "I'm ready" button
+Step 1: Breathe     — Guided breathing: Start, then 3 rounds of in / hold / out (4s each,
+                      counted 1–4) with per-phase colour, orb, rings, sparkles and leaves;
+                      "Skip, I'm ready" at any time; still visuals under reduced motion
 Step 2: Reflect     — "How are you feeling right now?" textarea
 Step 3: Gratitude   — "What are you grateful for today?" textarea
 Step 4: Intention   — "What one thing will you do today?" textarea + Submit

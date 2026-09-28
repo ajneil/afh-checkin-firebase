@@ -66,9 +66,27 @@ export function CheckInLoader({ token }: Props) {
   return (
     <div className="flex flex-col gap-8">
       {prompt && (
-        <p className="rounded-2xl p-6 text-lg leading-relaxed" style={{ background: '#BEE6F2', color: '#111111' }}>
-          {prompt}
-        </p>
+        <section className="prompt-card" aria-label="This morning">
+          <span className="prompt-sun" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+            </svg>
+          </span>
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: '#E1446F' }}>
+              This morning
+            </p>
+            <p className="text-lg leading-relaxed mt-1" style={{ color: '#111111' }}>
+              {prompt}
+            </p>
+          </div>
+          <svg className="prompt-leaves" viewBox="0 0 80 80" aria-hidden="true">
+            <path d="M40 76C40 50 50 30 72 22c0 26-12 44-32 54Z" fill="#bfe3d0" />
+            <path d="M40 76C38 54 26 38 8 32c2 24 14 38 32 44Z" fill="#cde6f5" />
+            <path d="M40 76 64 32M40 76 16 40" stroke="#9ccbb3" strokeWidth="1.2" fill="none" />
+          </svg>
+        </section>
       )}
       <CheckInFlow token={token} />
     </div>

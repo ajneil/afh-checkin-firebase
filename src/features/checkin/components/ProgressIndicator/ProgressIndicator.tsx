@@ -9,7 +9,7 @@ type Props = { currentStep: 1 | 2 | 3 | 4 }
 
 export function ProgressIndicator({ currentStep }: Props) {
   return (
-    <ol className="flex items-center justify-center gap-3" aria-label="Check-in progress">
+    <ol className="flex items-start justify-center" aria-label="Check-in progress">
       {STEPS.map((s, i) => {
         const stepNum = i + 1
         const isActive = stepNum === currentStep
@@ -20,7 +20,8 @@ export function ProgressIndicator({ currentStep }: Props) {
             role="listitem"
             aria-current={isActive ? 'step' : undefined}
             data-completed={isCompleted ? 'true' : undefined}
-            className="flex flex-col items-center gap-1"
+            className="progress-step flex flex-col items-center gap-1"
+            data-reached={stepNum <= currentStep ? 'true' : undefined}
           >
             <span
               className="w-3 h-3 rounded-full block"

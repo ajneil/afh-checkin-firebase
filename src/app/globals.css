@@ -47,3 +47,259 @@ body {
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out both;
 }
+
+/* ---------- Animated breathing (Breathe step) ---------- */
+.breathe-card {
+  --sky: #e6f4fb;
+  --orb-core: #eaf8fd;
+  --orb-edge: #6db8ea;
+  --ring: rgba(109, 184, 234, 0.22);
+  --wave-back: #cfe8f6;
+  --wave-front: #b9ddf2;
+  position: relative;
+  /* clip, not hidden: a hidden overflow can still be scrolled sideways by the browser */
+  overflow: clip;
+  border-radius: 1.5rem;
+  padding: 2rem 1.5rem 7rem;
+  background-color: var(--sky);
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0) 70%);
+  box-shadow: 0 10px 30px rgba(17, 17, 17, 0.06);
+  transition: background-color 1.2s ease;
+  min-height: 30rem;
+}
+.breathe-card[data-phase='hold'] {
+  --sky: #efeafb;
+  --orb-core: #f3efff;
+  --orb-edge: #a795ec;
+  --ring: rgba(167, 149, 236, 0.22);
+  --wave-back: #e2dbf7;
+  --wave-front: #d3c8f2;
+}
+.breathe-card[data-phase='out'],
+.breathe-card[data-phase='done'] {
+  --sky: #e7f6ea;
+  --orb-core: #effaf1;
+  --orb-edge: #84cc92;
+  --ring: rgba(132, 204, 146, 0.24);
+  --wave-back: #d3eed9;
+  --wave-front: #bde4c6;
+}
+
+.breathe-stage {
+  position: relative;
+  height: 15rem;
+  display: grid;
+  place-items: center;
+  margin: 0.5rem 0 1rem;
+}
+.breathe-orb,
+.breathe-ring {
+  grid-area: 1 / 1;
+  border-radius: 9999px;
+  transform: scale(0.82);
+  transition: transform 4s cubic-bezier(0.45, 0, 0.55, 1), background 1.2s ease, box-shadow 1.2s ease;
+}
+.breathe-orb {
+  position: relative;
+  z-index: 2;
+  width: 9rem;
+  height: 9rem;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 42% 38%, var(--orb-core) 0%, var(--orb-edge) 78%);
+  box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.55), 0 12px 40px var(--ring), inset 0 -8px 24px rgba(255, 255, 255, 0.45);
+}
+.breathe-ring {
+  width: 9rem;
+  height: 9rem;
+  background: var(--ring);
+}
+.breathe-ring.breathe-ring-1 { transition-delay: 0.1s; }
+.breathe-ring.breathe-ring-2 { transition-delay: 0.25s; opacity: 0.7; }
+.breathe-ring.breathe-ring-3 { transition-delay: 0.4s; opacity: 0.45; }
+
+.breathe-card[data-phase='idle'] .breathe-orb { animation: breathe-idle 4s ease-in-out infinite; }
+.breathe-card[data-phase='in'] .breathe-orb,
+.breathe-card[data-phase='hold'] .breathe-orb { transform: scale(1.15); }
+.breathe-card[data-phase='in'] .breathe-ring-1,
+.breathe-card[data-phase='hold'] .breathe-ring-1 { transform: scale(1.4); }
+.breathe-card[data-phase='in'] .breathe-ring-2,
+.breathe-card[data-phase='hold'] .breathe-ring-2 { transform: scale(1.7); }
+.breathe-card[data-phase='in'] .breathe-ring-3,
+.breathe-card[data-phase='hold'] .breathe-ring-3 { transform: scale(2); }
+.breathe-card[data-phase='hold'] .breathe-orb { animation: breathe-shimmer 2s ease-in-out infinite; }
+
+.breathe-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #1d3557;
+  line-height: 1;
+}
+.breathe-count b {
+  font-size: 2.75rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  animation: breathe-count-in 0.4s ease-out;
+}
+.breathe-count small {
+  font-size: 0.9rem;
+  margin-top: 0.3rem;
+  opacity: 0.75;
+}
+
+/* Floating sparkles while holding */
+.breathe-spark {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.breathe-card[data-phase='hold'] .breathe-spark {
+  opacity: 1;
+  animation: breathe-float 4s ease-in-out infinite;
+}
+.spark-1 { left: 18%; top: 30%; }
+.spark-2 { left: 80%; top: 22%; animation-delay: -1s !important; }
+.spark-3 { left: 26%; top: 72%; width: 5px; height: 5px; animation-delay: -2s !important; }
+.spark-4 { left: 72%; top: 66%; animation-delay: -3s !important; }
+.spark-5 { left: 88%; top: 48%; width: 5px; height: 5px; animation-delay: -1.5s !important; }
+.spark-6 { left: 10%; top: 52%; width: 6px; height: 6px; animation-delay: -2.5s !important; }
+
+/* Drifting leaves while breathing out */
+.breathe-leaf {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  fill: #7fc98d;
+  stroke: #5fae6f;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.breathe-card[data-phase='out'] .breathe-leaf,
+.breathe-card[data-phase='done'] .breathe-leaf {
+  opacity: 0.85;
+  animation: breathe-drift 5s ease-in-out infinite;
+}
+.leaf-1 { left: 16%; top: 20%; }
+.leaf-2 { left: 78%; top: 30%; width: 28px; height: 28px; animation-delay: -1.2s !important; }
+.leaf-3 { left: 24%; top: 62%; width: 18px; height: 18px; animation-delay: -2.4s !important; }
+.leaf-4 { left: 70%; top: 70%; width: 16px; height: 16px; animation-delay: -3.6s !important; }
+
+/* Rolling waves at the bottom of the card */
+.breathe-waves {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 200%;
+  height: 8rem;
+  animation: breathe-waves 18s linear infinite;
+}
+.breathe-waves .wave-back { fill: var(--wave-back); transition: fill 1.2s ease; }
+.breathe-waves .wave-front { fill: var(--wave-front); transition: fill 1.2s ease; opacity: 0.9; }
+
+.breathe-button {
+  background: linear-gradient(90deg, #e1446f, #f06a7e);
+  box-shadow: 0 10px 24px rgba(225, 68, 111, 0.3);
+}
+
+@keyframes breathe-idle {
+  0%, 100% { transform: scale(0.82); }
+  50% { transform: scale(0.92); }
+}
+@keyframes breathe-shimmer {
+  0%, 100% { transform: scale(1.15); filter: brightness(1); }
+  50% { transform: scale(1.17); filter: brightness(1.06); }
+}
+@keyframes breathe-count-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes breathe-float {
+  0%, 100% { transform: translateY(0); opacity: 0.4; }
+  50% { transform: translateY(-14px); opacity: 1; }
+}
+@keyframes breathe-drift {
+  0% { transform: translate(0, -6px) rotate(0deg); }
+  50% { transform: translate(14px, 10px) rotate(25deg); }
+  100% { transform: translate(0, -6px) rotate(0deg); }
+}
+@keyframes breathe-waves {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* Reduced motion: keep colour and the counted text, drop movement. */
+@media (prefers-reduced-motion: reduce) {
+  .breathe-card *,
+  .breathe-card {
+    animation: none !important;
+    transition: background-color 0.3s ease, opacity 0.3s ease, fill 0.3s ease !important;
+  }
+  .breathe-orb,
+  .breathe-ring {
+    transform: scale(1) !important;
+  }
+  .breathe-leaf,
+  .breathe-spark {
+    display: none;
+  }
+}
+
+/* ---------- Morning prompt card ---------- */
+.prompt-card {
+  position: relative;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1.5rem 5.5rem 1.5rem 1.5rem;
+  border-radius: 1.5rem;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(17, 17, 17, 0.06);
+  overflow: hidden;
+  text-align: left;
+}
+.prompt-sun {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  background: #fde4ea;
+  color: #e1446f;
+}
+.prompt-sun svg {
+  width: 1.6rem;
+  height: 1.6rem;
+}
+.prompt-leaves {
+  position: absolute;
+  right: 0.5rem;
+  bottom: -0.25rem;
+  width: 5rem;
+  height: 5rem;
+  opacity: 0.9;
+}
+
+/* ---------- Progress connectors ---------- */
+.progress-step {
+  position: relative;
+  width: 5.5rem;
+}
+.progress-step + .progress-step::before {
+  content: '';
+  position: absolute;
+  top: 0.375rem;
+  right: calc(50% + 0.6rem);
+  width: calc(100% - 1.2rem);
+  height: 2px;
+  background: #d1d5db;
+}
+.progress-step[data-reached='true'] + .progress-step[data-reached='true']::before {
+  background: #f3a5b9;
+}
