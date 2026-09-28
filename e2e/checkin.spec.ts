@@ -70,7 +70,7 @@ test.describe('Check-in flow — valid token', () => {
     await page.goto(`/checkin/${FAKE_TOKEN}`)
     // Step 1: Breathe
     await expect(page.getByRole('heading', { name: /breath/i })).toBeVisible()
-    await page.getByRole('button', { name: "I'm ready" }).click()
+    await page.getByRole('button', { name: "Skip, I'm ready" }).click()
     // Step 2: Reflect
     await expect(page.getByRole('heading', { name: /how are you feeling/i })).toBeVisible()
     await clickNext(page)
@@ -83,7 +83,7 @@ test.describe('Check-in flow — valid token', () => {
 
   test('user can submit responses and sees the completion state', async ({ page }) => {
     await page.goto(`/checkin/${FAKE_TOKEN}`)
-    await page.getByRole('button', { name: "I'm ready" }).click()
+    await page.getByRole('button', { name: "Skip, I'm ready" }).click()
     await clickNext(page)
     await clickNext(page)
     await page.locator('main').getByRole('button', { name: 'Submit', exact: true }).click()
