@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import { Celebration } from '@/components/decor'
 import { useCheckIn } from '../../hooks/useCheckIn'
 import { ProgressIndicator } from '../ProgressIndicator'
 import { BreatheStep } from '../steps/BreatheStep'
@@ -16,21 +16,10 @@ export function CheckInFlow({ token }: Props) {
 
   if (submitted) {
     return (
-      <div
-        className="animate-fade-in flex flex-col items-center text-center gap-6 rounded-2xl p-10"
-        style={{ background: '#F9E78B' }}
-      >
-        <p className="text-6xl" role="img" aria-label="Star">🌟</p>
-        <h2 className="text-2xl font-bold" style={{ color: '#111111' }}>
-          Well done, you!
-        </h2>
-        <p className="text-base leading-relaxed max-w-xs" style={{ color: '#444' }}>
-          You&apos;ve completed today&apos;s check-in. Carry that intention with you — it matters more than you think.
-        </p>
-        <Link href="/" className="font-bold underline" style={{ color: '#E1446F' }}>
-          See your check-ins
-        </Link>
-      </div>
+      <Celebration title="Well done, you!" cta={{ href: '/', label: 'See your check-ins' }}>
+        You&apos;ve completed today&apos;s check-in. Carry that intention with you — it matters
+        more than you think.
+      </Celebration>
     )
   }
 

@@ -2,7 +2,9 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { ArrowIcon, Celebration, IconBubble, Sprig } from '@/components/decor'
 import { CheckInFlow } from '../CheckInFlow'
+import { PromptCard } from '../PromptCard'
 
 type Status = 'loading' | 'pending' | 'completed' | 'not_found' | 'error'
 
@@ -27,67 +29,47 @@ export function CheckInLoader({ token }: Props) {
   if (status === 'loading') {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <p className="text-base" style={{ color: '#888' }}>Loading…</p>
+        <p className="text-base animate-pulse" style={{ color: '#5b6470' }}>
+          Getting your check-in ready…
+        </p>
       </div>
     )
   }
 
   if (status === 'not_found' || status === 'error') {
     return (
-      <div className="flex flex-col items-center text-center gap-4 py-16">
-        <p className="text-5xl">🔍</p>
-        <h1 className="text-2xl font-bold" style={{ color: '#111111' }}>
+      <div className="soft-card soft-card-blue px-6 py-12 text-center flex flex-col items-center gap-4">
+        <IconBubble tone="blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round">
+            <path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1" />
+          </svg>
+        </IconBubble>
+        <h1 className="text-2xl font-bold" style={{ color: '#14213d' }}>
           This link isn&apos;t valid
         </h1>
-        <p className="text-base" style={{ color: '#555' }}>
+        <p className="text-base max-w-sm" style={{ color: '#5b6470' }}>
           It may have expired or been used already. Check your email for a fresh link.
         </p>
+        <Link href="/" className="pill-button mt-2">
+          Go to your check-ins
+          <ArrowIcon />
+        </Link>
+        <Sprig className="absolute -right-2 -bottom-2 w-20 opacity-70" tone="blue" />
       </div>
     )
   }
 
   if (status === 'completed') {
     return (
-      <div className="flex flex-col items-center text-center gap-4 py-16">
-        <p className="text-5xl">🌟</p>
-        <h1 className="text-2xl font-bold" style={{ color: '#111111' }}>
-          You&apos;ve already completed today&apos;s check-in
-        </h1>
-        <p className="text-base" style={{ color: '#555' }}>
-          Brilliant work. Take a breath and carry that intention with you today. See you tomorrow!
-        </p>
-        <Link href="/" className="font-bold underline" style={{ color: '#E1446F' }}>
-          See your check-ins
-        </Link>
-      </div>
+      <Celebration level={1} title="You've already completed today's check-in" cta={{ href: '/', label: 'See your check-ins' }}>
+        Brilliant work. Take a breath and carry that intention with you today. See you tomorrow!
+      </Celebration>
     )
   }
 
   return (
     <div className="flex flex-col gap-8">
-      {prompt && (
-        <section className="prompt-card" aria-label="This morning">
-          <span className="prompt-sun" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
-              <circle cx="12" cy="12" r="4" />
-              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
-            </svg>
-          </span>
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: '#E1446F' }}>
-              This morning
-            </p>
-            <p className="text-lg leading-relaxed mt-1" style={{ color: '#111111' }}>
-              {prompt}
-            </p>
-          </div>
-          <svg className="prompt-leaves" viewBox="0 0 80 80" aria-hidden="true">
-            <path d="M40 76C40 50 50 30 72 22c0 26-12 44-32 54Z" fill="#bfe3d0" />
-            <path d="M40 76C38 54 26 38 8 32c2 24 14 38 32 44Z" fill="#cde6f5" />
-            <path d="M40 76 64 32M40 76 16 40" stroke="#9ccbb3" strokeWidth="1.2" fill="none" />
-          </svg>
-        </section>
-      )}
+      {prompt && <PromptCard prompt={prompt} />}
       <CheckInFlow token={token} />
     </div>
   )
