@@ -1,4 +1,5 @@
 import { SignOutButton } from '@/features/auth'
+import { PushToggle } from '@/features/notifications'
 import { ArrowIcon, HeartIcon, IconBubble, Sprig, SunIcon, TargetIcon } from '@/components/decor'
 import { splitGreeting } from '@/lib/text/splitGreeting'
 import type { RecentAnswer } from '@/lib/ai/morningPrompt'
@@ -105,6 +106,8 @@ export function Dashboard({ name, today, history, morningEmails, startAction, em
           </ul>
         </section>
       )}
+
+      <PushToggle />
 
       <form action={emailsAction} className="soft-card p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
         <p className="text-base" style={{ color: '#5b6470' }}>
