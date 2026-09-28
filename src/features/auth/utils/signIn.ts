@@ -11,6 +11,7 @@ import {
 } from 'firebase/auth'
 import { clientAuth } from '@/lib/firebase/client'
 import { authErrorMessage } from './authErrorMessage'
+import { disablePush } from '@/features/notifications'
 
 const PENDING_KEY = 'afh:email-sign-in'
 
@@ -94,6 +95,8 @@ export async function finishEmailLink({ name, email }: PendingSignIn): Promise<v
 }
 
 export async function signOutEverywhere(): Promise<void> {
+  // Stop morning notifications on this device before the session goes.
+  await disablePush().catch(() => {})
   await fetch('/api/session', { method: 'DELETE' })
   window.location.assign('/')
 }

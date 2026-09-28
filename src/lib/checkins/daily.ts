@@ -2,7 +2,13 @@ import { randomUUID } from 'node:crypto'
 import { checkInsCollection, daysCollection, db } from '@/lib/db/firestore'
 import { morningPrompt, type RecentAnswer } from '@/lib/ai/morningPrompt'
 
-export type Today = { token: string; prompt: string; emailedAt: Date | null; completed: boolean }
+export type Today = {
+  token: string
+  prompt: string
+  emailedAt: Date | null
+  pushedAt: Date | null
+  completed: boolean
+}
 
 const text = (value: unknown) => (typeof value === 'string' && value.trim() ? value : null)
 
@@ -28,11 +34,13 @@ export async function findCheckIn(email: string, day: string): Promise<Today | n
   if (!snap.exists) return null
   const token = String(snap.get('token'))
   const checkIn = await checkInsCollection().doc(token).get()
-  const emailedAt = snap.get('emailedAt')
+  const asDate = (v: unknown) =>
+    v ? new Date((v as { toDate?: () => Date }).toDate?.() ?? (v as Date)) : null
   return {
     token,
     prompt: String(snap.get('prompt') ?? ''),
-    emailedAt: emailedAt ? new Date(emailedAt.toDate?.() ?? emailedAt) : null,
+    emailedAt: asDate(snap.get('emailedAt')),
+    pushedAt: asDate(snap.get('pushedAt')),
     completed: Boolean(checkIn.get('completedAt')),
   }
 }
@@ -52,7 +60,14 @@ export async function getOrCreateCheckIn(
     // Both documents or neither: the day doc's create() fails if another request won.
     await db
       .batch()
-      .create(daysCollection(user.email).doc(day), { day, token, prompt, emailedAt: null, createdAt: now })
+      .create(daysCollection(user.email).doc(day), {
+        day,
+        token,
+        prompt,
+        emailedAt: null,
+        pushedAt: null,
+        createdAt: now,
+      })
       .create(checkInsCollection().doc(token), {
         userId: user.email,
         day,
@@ -71,5 +86,5 @@ export async function getOrCreateCheckIn(
     if (winner) return winner
     throw error
   }
-  return { token, prompt, emailedAt: null, completed: false }
+  return { token, prompt, emailedAt: null, pushedAt: null, completed: false }
 }

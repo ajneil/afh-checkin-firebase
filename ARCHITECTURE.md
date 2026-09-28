@@ -87,10 +87,26 @@ httpOnly `__session` cookie (the only cookie Firebase's CDN forwards). Server Co
 call `getCurrentUser()`; the browser keeps no Firebase state. Accounts are keyed by email,
 so Google and email-link sign-ins for the same address are one person.
 
+## Morning notifications
+
+The app is installable (`src/app/manifest.ts`, PNG icons, `appleWebApp` metadata), which iPhone
+requires before it allows web push. On the home page, **Morning notifications** asks for
+permission, registers `public/sw.js`, gets an FCM token (`firebase/messaging` with the public
+`NEXT_PUBLIC_FIREBASE_VAPID_KEY`) and posts it to `POST /api/push`. The route requires the
+session cookie and stores it via the Admin SDK at `users/{email}/devices/{sha256(token)}`
+(`{ token, updatedAt }`), so Firestore stays server-only. Turning it off or signing out calls
+`DELETE /api/push`. The control is hidden until the VAPID key is set, explains the Home Screen
+step on iPhone, and says so plainly when a browser can't do push or notifications are blocked.
+
+The service worker shows every push (Safari requires it) and a tap opens that day's check-in
+link, restricted to this site's origin.
+
 ## Morning emails and AI prompt
 
 Cloud Scheduler calls `POST /api/cron/morning` hourly at :30 with `Authorization: Bearer
-$CRON_SECRET`. For each person with `morningEmails` on, whose local time is 07:00–09:59,
+$CRON_SECRET`. The job (`sendMorningCheckIns`) sends the email to people with `morningEmails` on and a
+data-only web push (3-hour TTL) to every registered device, independently and each at most once a
+day (`emailedAt` / `pushedAt`); tokens FCM reports as unregistered are deleted. For each person with `morningEmails` on, whose local time is 07:00–09:59,
 the job gets or creates today's check-in and sends it unless it was already emailed or
 completed; `emailedAt` is set after sending so a failed send is retried by the next run.
 
@@ -199,7 +215,8 @@ apphosting.yaml                  # Firebase App Hosting runtime config
 |---|---|
 | `POST /api/session` | `{ idToken, name?, timeZone? }` → verify, create/link account, set session cookie, welcome email for new accounts |
 | `DELETE /api/session` | Sign out (clear cookie) |
-| `POST /api/cron/morning` | Morning email job; requires `Authorization: Bearer $CRON_SECRET` |
+| `POST /api/cron/morning` | Morning email and push job; requires `Authorization: Bearer $CRON_SECRET` |
+| `POST` / `DELETE /api/push` | `{ token }` → register or remove this device for morning notifications (signed in) |
 | `GET /api/checkin/[token]` | `{ status: 'pending' \| 'completed' \| 'not_found', prompt? }` |
 | `POST /api/checkin/complete` | `{ token, reflection, gratitude, intention }` → save responses once |
 | `startTodaysCheckIn` (action) | Get or create today's check-in for the signed-in person, redirect to it |

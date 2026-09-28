@@ -1,6 +1,6 @@
 import { timingSafeEqual } from 'node:crypto'
 import { NextRequest } from 'next/server'
-import { sendMorningEmails } from '@/lib/morning/sendMorningEmails'
+import { sendMorningCheckIns } from '@/lib/morning/sendMorningCheckIns'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: 'Unauthorised' }, { status: 401 })
   }
   try {
-    return Response.json(await sendMorningEmails(new Date()))
+    return Response.json(await sendMorningCheckIns(new Date()))
   } catch (error) {
     console.error('Morning job failed', error)
     return Response.json({ error: 'Morning job failed' }, { status: 500 })

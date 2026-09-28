@@ -1,6 +1,7 @@
 import { getApps, initializeApp } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
 import { getFirestore } from 'firebase-admin/firestore'
+import { getMessaging } from 'firebase-admin/messaging'
 
 if (!getApps().length) {
   // Application Default Credentials — provided automatically on Firebase App
@@ -11,6 +12,7 @@ if (!getApps().length) {
 
 export const db = getFirestore()
 export const adminAuth = () => getAuth()
+export const adminMessaging = () => getMessaging()
 
 export type UserDoc = {
   name: string
@@ -27,6 +29,7 @@ export type DayDoc = {
   token: string
   prompt: string
   emailedAt: Date | null
+  pushedAt: Date | null
   createdAt: Date
 }
 
@@ -46,3 +49,5 @@ export type CheckInDoc = {
 export const usersCollection = () => db.collection('users')
 export const daysCollection = (email: string) => usersCollection().doc(email).collection('days')
 export const checkInsCollection = () => db.collection('checkins')
+/** Push-notification devices; doc ID = sha256 of the FCM token. */
+export const devicesCollection = (email: string) => usersCollection().doc(email).collection('devices')

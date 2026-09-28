@@ -29,6 +29,14 @@ env:
   - variable: NEXT_PUBLIC_FIREBASE_APP_ID
     value: "1:173107512243:web:79c004953e0f0b2db281c6"
     availability: [BUILD]
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: "173107512243"
+    availability: [BUILD]
+  # Public Web Push certificate key (Project settings → Cloud Messaging → Web Push
+  # certificates → Generate key pair). Until set, the notifications setting stays hidden.
+  # - variable: NEXT_PUBLIC_FIREBASE_VAPID_KEY
+  #   value: "REPLACE-WITH-WEB-PUSH-KEY"
+  #   availability: [BUILD]
 
   # SMTP: a real transactional email provider (e.g. Resend, Brevo) in production.
   # Mailpit is dev-only.

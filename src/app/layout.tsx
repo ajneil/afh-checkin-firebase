@@ -16,6 +16,8 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Daily Check-In — Action for Happiness",
   description: "A gentle daily pause to breathe, reflect, and set one small intention.",
+  appleWebApp: { capable: true, title: "Check-In", statusBarStyle: "default" },
+  icons: { icon: "/icon-192.png", apple: "/apple-touch-icon.png" },
 };
 
 export default function RootLayout({
