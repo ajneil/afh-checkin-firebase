@@ -12,7 +12,12 @@ const transport = nodemailer.createTransport({
 
 export async function sendEmail(to: string, subject: string, html: string): Promise<void> {
   await transport.sendMail({
-    from: process.env.MAIL_FROM || 'Daily Check-In <checkin@actionforhappiness.org>',
+    // Gmail and most providers only send as the signed-in account, so default to it.
+    from:
+      process.env.MAIL_FROM ||
+      (process.env.SMTP_USER
+        ? `Daily Check-In <${process.env.SMTP_USER}>`
+        : 'Daily Check-In <checkin@actionforhappiness.org>'),
     to,
     subject,
     html,

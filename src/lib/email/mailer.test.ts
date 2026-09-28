@@ -63,4 +63,15 @@ describe('sendEmail', () => {
       expect.objectContaining({ from: 'Daily Check-In <hello@example.org>' })
     )
   })
+
+  it('sends from the SMTP account when MAIL_FROM is not set', async () => {
+    process.env.SMTP_USER = 'me@gmail.com'
+    process.env.SMTP_PASS = 'app-password'
+    const { sendEmail } = await import('./mailer')
+    await sendEmail('to@example.com', 'S', '<p>html</p>')
+    expect(mockSendMail).toHaveBeenCalledWith(
+      expect.objectContaining({ from: 'Daily Check-In <me@gmail.com>' })
+    )
+  })
 })
+
